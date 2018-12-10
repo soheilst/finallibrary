@@ -9,13 +9,37 @@ import static android.content.ContentValues.TAG;
 
 public class Charkh {
     public publicvar pubvar;
+
     public IabHelper mhelper;
     public String msg;
+    public String msg2;
     public Context context;
     public String Sku;
     public String payload;
     public int RC_REQUEST;
+    private Listener listener;
+    private Listener2 listener2;
 
+    private interface Listener {
+        public void onSuccess(String msg);
+
+        public void onFailure(String msg);
+        public void onsuccesstoken(String msg2);
+    }
+
+    public interface Listener2 {
+        public void onSuccess(String msg);
+
+        public void onFailure(String msg);
+        public void onsuccesstoken(String msg2);
+    }
+
+    public void resListener(Listener listener) {
+        this.listener = listener;
+    }
+    public void resListener2(Listener2 listener2) {
+        this.listener2 = listener2;
+    }
     public Charkh(publicvar p) {
         pubvar = p;
         msg = pubvar.Message[0];
@@ -25,33 +49,237 @@ public class Charkh {
         RC_REQUEST = pubvar.RC_REQUEST;
     }
 
+    private IabHelper.OnIabPurchaseFinishedListener mPurchaseFinishedListener = new IabHelper.OnIabPurchaseFinishedListener() {
+        public void onIabPurchaseFinished(IabResult result, Purchase purchase) {
+            Log.d(TAG, "Purchase finished: " + result + ", purchase: " + purchase);
+            if (result.isFailure()) {
+                return;
+            }
+            if (!verifyDeveloperPayload(purchase)) {
+                return;
+            }
+
+            Log.d(TAG, "Purchase successful.");
+        }
+    };
+    private IabHelper.QueryInventoryFinishedListener mGotInventoryListener = new IabHelper.QueryInventoryFinishedListener() {
+
+        @Override
+        public void onQueryInventoryFinished(IabResult Result, Inventory inventory) {
+
+            if (mhelper == null) {
+                Log.d(TAG, "step6");
+                return;
+            }
+            if (Result.isFailure()) {
+                Log.d(TAG, "step7");
+                try {
+                    mhelper.launchPurchaseFlow((Activity) context, Sku, RC_REQUEST, mPurchaseFinishedListener, payload);
+                    msg = "user never sub";
+                    Log.d(TAG, "step8");
+                } catch (IabHelper.IabAsyncInProgressException e) {
+                    msg = e.toString();
+                    Log.d(TAG, "step9");
+                }
+                msg2 = "Query Inventory :Finish";
+                return;
+            }
+            Purchase purchase = inventory.getPurchase(pubvar.Sku);
+            if (purchase != null) {
+                try {
+
+                    msg = "user is subscribe";
+                    // barrier.await();
+
+
+                } catch (Exception e) {
+                    msg = e.toString();
+                }
+            }
+            if (purchase == null) {
+
+                try {
+                    SkuDetails skuDetails = inventory.getSkuDetails(pubvar.Sku);
+                    String j = skuDetails.getPrice();
+                    msg = j;
+                    Log.d(TAG, j);
+
+                    Log.d(TAG, "step12");
+                } catch (Exception e) {
+                    msg = e.toString();
+                    Log.d(TAG, "step13");
+
+                }
+
+
+            }
+        }
+
+    };
+    private IabHelper.QueryInventoryFinishedListener mGotInventorysub = new IabHelper.QueryInventoryFinishedListener() {
+        @Override
+        public void onQueryInventoryFinished(IabResult Result, Inventory inventory) {
+            if (mhelper == null) {
+                listener.onSuccess("Setup Fail");
+                return;
+            }
+            if (Result.isFailure()) {
+                listener.onSuccess("User must be subscribe");
+
+                return;
+            }
+            Purchase purchase = inventory.getPurchase(pubvar.Sku);
+
+            if (purchase != null) {
+                try {
+                    listener.onSuccess("User is Subscribe");
+                    return;
+
+                } catch (Exception e) {
+                    listener.onFailure(e.toString());
+                    return;
+
+                }
+
+            }
+            if (purchase == null) {
+                listener.onSuccess("User must be subscribe");
+                return;
+            }
+        }
+
+    };
+
+    private IabHelper.QueryInventoryFinishedListener mgotunsub = new IabHelper.QueryInventoryFinishedListener() {
+        @Override
+        public void onQueryInventoryFinished(IabResult Result, Inventory inventory) {
+            if (mhelper == null) {
+                listener.onFailure("Setup Fail");
+                return;
+            }
+            if (Result.isFailure()) {
+                listener.onFailure("User must be subscribe");
+
+                return;
+            }
+            Purchase purchase = inventory.getPurchase(pubvar.Sku);
+
+            if (purchase != null) {
+                try {
+                    listener.onSuccess(purchase.getPackageName());
+                    listener.onsuccesstoken(purchase.getToken());
+
+                    return;
+
+                } catch (Exception e) {
+
+                    return;
+
+                }
+
+            }
+            if (purchase == null) {
+                listener.onSuccess("User must be subscribe");
+                return;
+            }
+        }
+
+    };
 
     public void mchar() {
+
         try {
             Log.d(TAG, "error111");
 
             mhelper.queryInventoryAsync(mGotInventoryListener);
-            Log.d(TAG, "error1112");
 
         } catch (IabHelper.IabAsyncInProgressException e) {
             msg = e.toString();
-            Log.d(TAG,msg);
+            Log.d(TAG, msg);
+
+        }
+
+
+    }
+
+    public void statuschar() {
+        try {
+            Log.d(TAG, "");
+
+
+            mhelper.queryInventoryAsync(mGotInventorysub);
+
+            Listener listener = new Listener() {
+                @Override
+                public void onSuccess(String msg) {
+                    Log.i("TAGL", msg);
+                    listener2.onSuccess(msg);
+                }
+
+                @Override
+                public void onFailure(String msg) {
+                    Log.i("TAGL", msg);
+                    listener2.onFailure(msg);
+                }
+
+                @Override
+                public void onsuccesstoken(String msg2) {
+
+                }
+            };
+
+            resListener(listener);
+
+
+        } catch (IabHelper.IabAsyncInProgressException e) {
+            msg = e.toString();
+            Log.d(TAG, msg);
+        }
+
+
+    }
+
+    public void unsubchar() {
+        try {
+            Log.d(TAG, "");
+
+
+            mhelper.queryInventoryAsync(mgotunsub);
+
+            Listener listener = new Listener() {
+                @Override
+                public void onSuccess(String msg) {
+                    listener2.onSuccess(msg);
+                }
+
+                @Override
+                public void onFailure(String msg) {
+                    listener2.onFailure(msg);
+                }
+
+                @Override
+                public void onsuccesstoken(String msg2) {
+                listener2.onsuccesstoken(msg2);
+                }
+            };
+
+            resListener(listener);
+
+
+        } catch (IabHelper.IabAsyncInProgressException e) {
+            msg = e.toString();
+            Log.d(TAG, msg);
         }
 
 
     }
 
     public void setup(Context context, String key) {
-
         Log.d(TAG, "step1");
-
         mhelper = new IabHelper(context, key, new MarketIntentFactorySDK(true));
         Log.d(TAG, "step2");
-
-
         boolean f = mhelper.subscriptionsSupported();
         if (!f) {
-            Log.d(TAG, "step3");
 
         }
         mhelper.startSetup(new IabHelper.OnIabSetupFinishedListener() {
@@ -72,7 +300,7 @@ public class Charkh {
                     Log.d(TAG, "step5");
 
                     Log.d(TAG, "onIabSetupFinished");
-                    msg = "onIabSetupFinished";
+                    msg2 = "onIabSetupFinished";
                     Log.d(TAG, "error3");
 
                     return;
@@ -81,84 +309,10 @@ public class Charkh {
         });
     }
 
-    private IabHelper.QueryInventoryFinishedListener mGotInventoryListener = new IabHelper.QueryInventoryFinishedListener() {
-        @Override
-        public void onQueryInventoryFinished(IabResult Result, Inventory inventory) {
-
-            if (mhelper == null) {
-                Log.d(TAG, "step6");
-                return;
-            }
-
-            if (Result.isFailure()) {
-                Log.d(TAG, "step7");
-
-                Purchase purchase = inventory.getPurchase(pubvar.Sku);
-
-
-//                if (purchase != null && verifyDeveloperPayload(purchase)) {
-                try {
-
-                    mhelper.launchPurchaseFlow((Activity) context, Sku, RC_REQUEST, mPurchaseFinishedListener, payload);
-                    Log.d(TAG, "step8");
-
-                } catch (IabHelper.IabAsyncInProgressException e) {
-                    msg = e.toString();
-                    Log.d(TAG, "step9");
-
-
-                }
-
-//                }
-                msg = "Query Inventory :Finish";
-                return;
-            }
-
-
-            Purchase purchase = inventory.getPurchase(pubvar.Sku);
-            Log.d(TAG, "step10");
-
-            if (purchase != null && verifyDeveloperPayload(purchase)) {
-                try {
-                    Log.d(TAG, "step11");
-                    mhelper.launchPurchaseFlow((Activity) pubvar.context, pubvar.Sku, pubvar.RC_REQUEST, mPurchaseFinishedListener, pubvar.payload);
-                    Log.d(TAG, "step12");
-                } catch (IabHelper.IabAsyncInProgressException e) {
-                    msg = e.toString();
-                    Log.d(TAG, "step13");
-
-                }
-
-            }
-            if (purchase == null) {
-                msg = "user is subscribe";
-            }
-        }
-
-    };
-    private IabHelper.OnIabPurchaseFinishedListener mPurchaseFinishedListener = new IabHelper.OnIabPurchaseFinishedListener() {
-        public void onIabPurchaseFinished(IabResult result, Purchase purchase) {
-            Log.d(TAG, "Purchase finished: " + result + ", purchase: " + purchase);
-
-
-            if (result.isFailure()) {
-                Log.d(TAG, "step14");
-
-                return;
-            }
-            if (!verifyDeveloperPayload(purchase)) {
-                Log.d(TAG, "step15");
-
-                return;
-            }
-
-            Log.d(TAG, "Purchase successful.");
-            msg = "purchase successful";
-        }
-    };
-
     private boolean verifyDeveloperPayload(Purchase p) {
         String payload = p.getDeveloperPayload();
         return true;
     }
+
+
 }

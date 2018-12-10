@@ -2,7 +2,6 @@ package com.keylid.keylidsdk;
 
 import android.content.Context;
 import android.util.Log;
-import com.android.billingclient.util.IabHelper;
 import okhttp3.*;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -15,6 +14,7 @@ import java.util.regex.Pattern;
 import static android.content.ContentValues.TAG;
 
 public class subapi {
+    final String[] optid = {""};
     public String msg;
     public Context context;
     public String Sku;
@@ -22,13 +22,10 @@ public class subapi {
     public int RC_REQUEST;
     public String base64st;
     public Charkh ch;
-    final String[] optid = {""};
-    public publicvar s=new publicvar();
-    public interface OKHttpNetwork{
-        void onSuccess(String body);
-        void onFailure(String body);
-    }
-    public subapi(publicvar p,Charkh charkh) {
+
+    public publicvar s = new publicvar();
+
+    public subapi(publicvar p, Charkh charkh) {
         ch = charkh;
         s = p;
         msg = s.Message[0];
@@ -36,22 +33,18 @@ public class subapi {
         Sku = s.Sku;
         payload = s.payload;
         RC_REQUEST = s.RC_REQUEST;
-        base64st=s.base64st;
+        base64st = s.base64st;
 
     }
-    public  void sub(final String Servicename, final String Token, final String Msisdn
-                     //,String userid
-            , final OKHttpNetwork okHttpCallBack) {
-        Pattern p = Pattern.compile("^(0|98|0098|\\Q+98\\E)?9(1|9)[0-9]*");
-        Pattern I=  Pattern.compile("^(0|98|0098|\\Q+98\\E)?9(4|3|0)[0-9]*");
-        Matcher mci = p.matcher(Msisdn);
-        Matcher mtn=I.matcher(Msisdn);
-        boolean b = mci.matches();
-        boolean c=mtn.matches();
-        Log.i(TAG, "msg is "+s.msgprogress);
 
-        if (b) {
-            if(s.msgprogress!="in progress") {
+    public void sub(final String Servicename, final String Token, final String Msisdn
+                    //,String userid
+            , final OKHttpNetwork okHttpCallBack) {
+        String reg = regex(Msisdn);
+        Log.i(TAG, "msg is " + s.msgprogress);
+
+        if (reg == "MCI") {
+            if (s.msgprogress != "in progress") {
                 s.msgprogress = "in progress";
                 String Url = "http://api.keylid.com/v3/sub";
                 Url += "/" + Servicename + "/" + Token + "/" + Msisdn;
@@ -93,34 +86,31 @@ public class subapi {
                         s.msgprogress = "progress end";
                     }
                 });
-            }
-            else {
+            } else {
                 okHttpCallBack.onFailure("waite for operator ");
                 okHttpCallBack.onSuccess("waite for operator ");
             }
         }
-        if (c){
+        if (reg == "MTN") {
 
 
-             ch.mchar();
+            ch.mchar();
         }
 
     }
-    public  void confirm(String Servicename,String Token,String Msisdn,String cfcode
-                         //,String userid
-            ,final OKHttpNetwork okHttpCallBack){
-        Pattern p = Pattern.compile("^(0|98|0098|\\Q+98\\E)?9(1|9)[0-9]*");
-        Matcher mci = p.matcher(Msisdn);
-        boolean b = mci.matches();
-        Log.i(TAG, "msg is "+s.msgprogress);
 
-        if (b) {
-            if(s.msgprogress!="in progress") {
+    public void confirm(String Servicename, String Token, String Msisdn, String cfcode
+                        //,String userid
+            , final OKHttpNetwork okHttpCallBack) {
+
+        String reg = regex(Msisdn);
+        if (reg == "MCI") {
+            if (s.msgprogress != "in progress") {
                 s.msgprogress = "in progress";
-                String Url="http://api.keylid.com/v3/confirm/";
-                Url+="/"+Servicename+"/"+Token+"/"+Msisdn+"/"+cfcode+
+                String Url = "http://api.keylid.com/v3/confirm/";
+                Url += "/" + Servicename + "/" + Token + "/" + Msisdn + "/" + cfcode +
                         //"/"+userid+
-                        "?"+s.opt[0];
+                        "?" + s.opt[0];
                 OkHttpClient client = new OkHttpClient.Builder()
                         .connectTimeout(180, TimeUnit.SECONDS)
                         .writeTimeout(180, TimeUnit.SECONDS)
@@ -158,8 +148,7 @@ public class subapi {
                         s.msgprogress = "progress end";
                     }
                 });
-            }
-            else {
+            } else {
                 okHttpCallBack.onFailure("waite for operator ");
                 okHttpCallBack.onSuccess("waite for operator ");
             }
@@ -167,15 +156,13 @@ public class subapi {
 
 
     }
-    public  void unsub(String Servicename,String Token,String Msisdn
-                       //,String userid
-            ,final OKHttpNetwork okHttpCallBack) {
-        Pattern p = Pattern.compile("^(0|98|0098|\\Q+98\\E)?9(1|9)[0-9]*");
-        Matcher mci = p.matcher(Msisdn);
-        boolean b = mci.matches();
-        Log.i(TAG, "msg is "+s.msgprogress);
-        if (b) {
-            if(s.msgprogress!="in progress") {
+
+    public void unsub(String Servicename, final String Token, String Msisdn
+                      //,String userid
+            , final OKHttpNetwork okHttpCallBack) {
+        String reg = regex(Msisdn);
+        if (reg == "MCI") {
+            if (s.msgprogress != "in progress") {
                 s.msgprogress = "in progress";
                 String Url = "http://api.keylid.com/v3/unsub/";
                 Url += "/" + Servicename + "/" + Token + "/" + Msisdn;
@@ -217,22 +204,83 @@ public class subapi {
                         s.msgprogress = "progress end";
                     }
                 });
-            }
-            else {
+            } else {
                 okHttpCallBack.onFailure("waite for operator ");
                 okHttpCallBack.onSuccess("waite for operator ");
             }
         }
+        if (reg == "MTN") {
+            Charkh.Listener2 listener = new Charkh.Listener2() {
+                @Override
+                public void onSuccess(String msg) {
+                    s.Pakagename = msg;
+                }
+
+                @Override
+                public void onFailure(String msg) {
+
+                    okHttpCallBack.onFailure("Message:" + msg);
+                }
+
+                @Override
+                public void onsuccesstoken(String msg2) {
+                    s.Token = msg2;
+                }
+            };
+            ch.resListener2(listener);
+            ch.unsubchar();
+            String Url = "http://185.12.103.39/charkhoone/unsub.php?token=";
+            Url += s.Token + ":cancel&sku=" + Sku + "&package=" + s.Pakagename;
+            //+"/"+userid;
+            OkHttpClient client = new OkHttpClient.Builder()
+                    .connectTimeout(180, TimeUnit.SECONDS)
+                    .writeTimeout(180, TimeUnit.SECONDS)
+                    .readTimeout(180, TimeUnit.SECONDS)
+                    .build();
+            Request request = new Request.Builder()
+                    .url(Url)
+                    .build();
+            client.newCall(request).enqueue(new Callback() {
+                @Override
+                public void onResponse(Call call, Response response) throws IOException {
+                    if (response.isSuccessful()) {
+                        JSONObject jresponse = null;
+                        try {
+                            jresponse = new JSONObject(response.body().string());
+                            JSONObject sys = jresponse.getJSONObject("data");
+                            // s.opt[0] = jresponse.getString("OptId");
+                            //s.Status[0] = jresponse.getString("Status");
+                            s.Message[0] = jresponse.getString("error_description");
+                            //s.Subscribed[0] = sys.getString("Subscribed");
+                            okHttpCallBack.onSuccess("{ Message: " + s.Message[0] + " }");
+                        } catch (JSONException e) {
+                            okHttpCallBack.onSuccess("Internal Server Error");
+                        }
+                    } else {
+                        okHttpCallBack.onSuccess("Fail");
+                        s.msgprogress = "progress end";
+                    }
+                }
+
+                @Override
+                public void onFailure(Call call, IOException e) {
+                    okHttpCallBack.onFailure("Internal Server Error");
+                    s.msgprogress = "progress end";
+                }
+            });
+        } else {
+            okHttpCallBack.onFailure("waite for operator ");
+            okHttpCallBack.onSuccess("waite for operator ");
+        }
+
 
     }
-    public  void getstatus(String Servicename,String Token,String Msisdn
-                           // ,String userid
-            ,final OKHttpNetwork okHttpCallBack) {
-        Pattern p = Pattern.compile("^(0|98|0098|\\Q+98\\E)?9(1|9)[0-9]*");
-        Matcher mci = p.matcher(Msisdn);
-        boolean b = mci.matches();
-        Log.i(TAG, "msg is " + s.msgprogress);
-        if (b) {
+
+    public void getstatus(String Servicename, String Token, String Msisdn
+                          // ,String userid
+            , final OKHttpNetwork okHttpCallBack) {
+        String reg = regex(Msisdn);
+        if (reg == "MCI") {
             if (s.msgprogress != "in progress") {
                 s.msgprogress = "in progress";
                 String Url = "http://api.keylid.com/v3/status/";
@@ -280,5 +328,48 @@ public class subapi {
                 okHttpCallBack.onSuccess("waite for operator ");
             }
         }
+        if (reg == "MTN") {
+            Charkh.Listener2 listener = new Charkh.Listener2() {
+                @Override
+                public void onSuccess(String msg) {
+                    okHttpCallBack.onSuccess("Message:"+msg);
+                }
+
+                @Override
+                public void onFailure(String msg) {
+                    okHttpCallBack.onSuccess("Message:"+msg);
+                }
+
+                @Override
+                public void onsuccesstoken(String msg2) {
+
+                }
+            };
+            ch.resListener2(listener);
+            ch.statuschar();
+        }
     }
+
+    public String regex(String msisdn) {
+        Pattern p = Pattern.compile("^(0|98|0098|\\Q+98\\E)?9(1|9)[0-9]*");
+        Pattern I = Pattern.compile("^(0|98|0098|\\Q+98\\E)?9(4|3|0)[0-9]*");
+        Matcher mci = p.matcher(msisdn);
+        Matcher mtn = I.matcher(msisdn);
+        boolean b = mci.matches();
+        boolean c = mtn.matches();
+        if (b) {
+            return "MCI";
+        }
+        if (c) {
+            return "MTN";
+        }
+        return "Not Match";
+    }
+
+    public interface OKHttpNetwork {
+        void onSuccess(String body);
+
+        void onFailure(String body);
+    }
+
 }

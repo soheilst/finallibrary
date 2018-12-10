@@ -13,6 +13,8 @@ public class publicvar {
     public String payload;
     public String Sku;
     public String base64st;
+    public String Token;
+    public  String Pakagename;
 
 
 }
