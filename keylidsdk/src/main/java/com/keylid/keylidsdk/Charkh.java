@@ -19,6 +19,8 @@ public class Charkh {
     public int RC_REQUEST;
     private Listener listener;
     private Listener2 listener2;
+    private Listener3 listener3;
+    private Listener4 listener4;
 
     private interface Listener {
         public void onSuccess(String msg);
@@ -33,6 +35,12 @@ public class Charkh {
         public void onFailure(String msg);
         public void onsuccesstoken(String msg2);
     }
+    public interface Listener3{
+        public void onPakage(String pakagename,String Token);
+    }
+    public interface Listener4{
+        public void onsuccesstoken(String pkj,String Tkn);
+    }
 
     public void resListener(Listener listener) {
         this.listener = listener;
@@ -40,6 +48,10 @@ public class Charkh {
     public void resListener2(Listener2 listener2) {
         this.listener2 = listener2;
     }
+    public void resListener3(Listener3 listener3) {
+        this.listener3 = listener3;
+    }
+    public void resListener4(Listener4 listener4){this.listener4=listener4;}
     public Charkh(publicvar p) {
         pubvar = p;
         msg = pubvar.Message[0];
@@ -132,7 +144,7 @@ public class Charkh {
 
             if (purchase != null) {
                 try {
-                    listener.onSuccess("User is Subscribe");
+                    listener.onSuccess(purchase.getPackageName());
                     return;
 
                 } catch (Exception e) {
@@ -154,11 +166,9 @@ public class Charkh {
         @Override
         public void onQueryInventoryFinished(IabResult Result, Inventory inventory) {
             if (mhelper == null) {
-                listener.onFailure("Setup Fail");
                 return;
             }
             if (Result.isFailure()) {
-                listener.onFailure("User must be subscribe");
 
                 return;
             }
@@ -166,8 +176,9 @@ public class Charkh {
 
             if (purchase != null) {
                 try {
-                    listener.onSuccess(purchase.getPackageName());
-                    listener.onsuccesstoken(purchase.getToken());
+                    String pk=purchase.getPackageName();
+                    String tk=purchase.getToken();
+                    listener3.onPakage(pk,tk);
 
                     return;
 
@@ -179,7 +190,6 @@ public class Charkh {
 
             }
             if (purchase == null) {
-                listener.onSuccess("User must be subscribe");
                 return;
             }
         }
@@ -241,30 +251,16 @@ public class Charkh {
 
     public void unsubchar() {
         try {
-            Log.d(TAG, "");
-
-
             mhelper.queryInventoryAsync(mgotunsub);
+          Listener3 listener2=new Listener3() {
+              @Override
+              public void onPakage(String pakagename, String Token) {
+                      listener4.onsuccesstoken(pakagename,Token);
 
-            Listener listener = new Listener() {
-                @Override
-                public void onSuccess(String msg) {
-                    listener2.onSuccess(msg);
-                }
-
-                @Override
-                public void onFailure(String msg) {
-                    listener2.onFailure(msg);
-                }
-
-                @Override
-                public void onsuccesstoken(String msg2) {
-                listener2.onsuccesstoken(msg2);
-                }
-            };
-
-            resListener(listener);
-
+                  Log.d("TAGL", "pkjtoken is :---->>>"+pakagename+"----"+Token);
+              }
+          };
+            resListener3(listener2);
 
         } catch (IabHelper.IabAsyncInProgressException e) {
             msg = e.toString();

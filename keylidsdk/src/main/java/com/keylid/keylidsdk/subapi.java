@@ -22,8 +22,17 @@ public class subapi {
     public int RC_REQUEST;
     public String base64st;
     public Charkh ch;
+    public String tok;
+    public String pk;
+    public interface OKHttpNetwork {
+        void onSuccess(String body);
 
-    public publicvar s = new publicvar();
+        void onFailure(String body);
+    }
+
+
+
+    public publicvar s ;
 
     public subapi(publicvar p, Charkh charkh) {
         ch = charkh;
@@ -34,8 +43,11 @@ public class subapi {
         payload = s.payload;
         RC_REQUEST = s.RC_REQUEST;
         base64st = s.base64st;
+        s.Token=tok;
+        s.Pakagename=pk;
 
     }
+
 
     public void sub(final String Servicename, final String Token, final String Msisdn
                     //,String userid
@@ -210,27 +222,60 @@ public class subapi {
             }
         }
         if (reg == "MTN") {
-            Charkh.Listener2 listener = new Charkh.Listener2() {
-                @Override
-                public void onSuccess(String msg) {
-                    s.Pakagename = msg;
-                }
+        Charkh.Listener4 lst=new Charkh.Listener4() {
+            @Override
+            public void onsuccesstoken(String pkj, String Tkn) {
+                String g=pkj;
+                String l=Tkn;
+                String Url = "http://185.12.103.39/charkhoone/unsub.php?token=";
+                Url += Tkn + ":cancel&sku=" + Sku + "&package=" + pkj;
+                //+"/"+userid;
+                OkHttpClient client = new OkHttpClient.Builder()
+                        .connectTimeout(180, TimeUnit.SECONDS)
+                        .writeTimeout(180, TimeUnit.SECONDS)
+                        .readTimeout(180, TimeUnit.SECONDS)
+                        .build();
+                Request request = new Request.Builder()
+                        .url(Url)
+                        .build();
+                client.newCall(request).enqueue(new Callback() {
+                    @Override
+                    public void onResponse(Call call, Response response) throws IOException {
+                        if (response.isSuccessful()) {
+                            JSONObject jresponse = null;
+                            try {
+                                jresponse = new JSONObject(response.body().string());
+                                //JSONObject sys = jresponse.getJSONObject("data");
+                                // s.opt[0] = jresponse.getString("OptId");
+                                //s.Status[0] = jresponse.getString("Status");
+                                s.Message[0] = jresponse.getString("error_description");
+                                //s.Subscribed[0] = sys.getString("Subscribed");
+                                okHttpCallBack.onSuccess("{ Message: " + s.Message[0] + " }");
+                            } catch (JSONException e) {
+                                okHttpCallBack.onSuccess(e.toString());
+                            }
+                        } else {
+                            okHttpCallBack.onSuccess("Fail");
+                            s.msgprogress = "progress end";
+                        }
+                    }
 
-                @Override
-                public void onFailure(String msg) {
+                    @Override
+                    public void onFailure(Call call, IOException e) {
+                        okHttpCallBack.onFailure("Internal Server Error");
+                        s.msgprogress = "progress end";
+                    }
+                });
 
-                    okHttpCallBack.onFailure("Message:" + msg);
-                }
 
-                @Override
-                public void onsuccesstoken(String msg2) {
-                    s.Token = msg2;
-                }
-            };
-            ch.resListener2(listener);
+            }
+
+        };
+        ch.resListener4(lst);
             ch.unsubchar();
+            /*
             String Url = "http://185.12.103.39/charkhoone/unsub.php?token=";
-            Url += s.Token + ":cancel&sku=" + Sku + "&package=" + s.Pakagename;
+            Url += tok + ":cancel&sku=" + Sku + "&package=" + pk;
             //+"/"+userid;
             OkHttpClient client = new OkHttpClient.Builder()
                     .connectTimeout(180, TimeUnit.SECONDS)
@@ -254,7 +299,7 @@ public class subapi {
                             //s.Subscribed[0] = sys.getString("Subscribed");
                             okHttpCallBack.onSuccess("{ Message: " + s.Message[0] + " }");
                         } catch (JSONException e) {
-                            okHttpCallBack.onSuccess("Internal Server Error");
+                            okHttpCallBack.onSuccess(e.toString());
                         }
                     } else {
                         okHttpCallBack.onSuccess("Fail");
@@ -271,10 +316,12 @@ public class subapi {
         } else {
             okHttpCallBack.onFailure("waite for operator ");
             okHttpCallBack.onSuccess("waite for operator ");
+            */
         }
 
 
     }
+
 
     public void getstatus(String Servicename, String Token, String Msisdn
                           // ,String userid
@@ -366,10 +413,6 @@ public class subapi {
         return "Not Match";
     }
 
-    public interface OKHttpNetwork {
-        void onSuccess(String body);
 
-        void onFailure(String body);
-    }
 
 }
