@@ -196,7 +196,7 @@ public class subapi {
                             try {
                                 jresponse = new JSONObject(response.body().string());
                                 JSONObject sys = jresponse.getJSONObject("data");
-                                s.opt[0] = jresponse.getString("OptId");
+                                //s.opt[0] = jresponse.getString("OptId");
                                 s.Status[0] = jresponse.getString("Status");
                                 s.Message[0] = jresponse.getString("Message");
                                 s.Subscribed[0] = sys.getString("Subscribed");
@@ -350,7 +350,7 @@ public class subapi {
                             try {
                                 jresponse = new JSONObject(response.body().string());
                                 JSONObject sys = jresponse.getJSONObject("data");
-                                s.opt[0] = jresponse.getString("OptId");
+                               // s.opt[0] = jresponse.getString("OptId");
                                 s.Status[0] = jresponse.getString("Status");
                                 s.Message[0] = jresponse.getString("Message");
                                 s.Subscribed[0] = sys.getString("Subscribed");

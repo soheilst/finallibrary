@@ -25,10 +25,6 @@ class Main2Activity : AppCompatActivity() {
         ch.setup(pu.context, pu.base64st)
         var g: String = intent.getStringExtra("number")
 
-        /// ch.msg = ""
-       // val g = arrayOf("")
-        //g[0] = "989393142536"
-        //g[0] = "989122895019"
 
         val cm = applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         val nInfo = cm.activeNetworkInfo
@@ -83,10 +79,6 @@ class Main2Activity : AppCompatActivity() {
             }
         }
 
-        charck.setOnClickListener {
-            ch.mchar()
-
-        }
         Status.setOnClickListener {
             val r = Random()
             pu.RC_REQUEST = r.nextInt()

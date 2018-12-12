@@ -144,7 +144,7 @@ public class Charkh {
 
             if (purchase != null) {
                 try {
-                    listener.onSuccess(purchase.getPackageName());
+                    listener.onSuccess("Subscribed :True");
                     return;
 
                 } catch (Exception e) {
