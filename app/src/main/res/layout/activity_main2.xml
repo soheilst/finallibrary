@@ -29,28 +29,28 @@
             app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintVertical_bias="0.017"
             android:layout_marginEnd="8dp" app:layout_constraintEnd_toEndOf="parent" android:layout_marginRight="8dp"
             android:layout_marginStart="8dp" app:layout_constraintStart_toStartOf="parent"
-            android:layout_marginLeft="8dp"/>
+            android:layout_marginLeft="8dp" app:layout_constraintHorizontal_bias="0.594"/>
     <Button
             android:text="confirm"
             android:layout_width="129dp"
             android:layout_height="43dp"
             android:id="@+id/btn2"
             android:layout_marginTop="68dp" app:layout_constraintTop_toTopOf="parent" android:layout_marginBottom="8dp"
-            app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintVertical_bias="0.035"
+            app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintVertical_bias="0.04"
             android:layout_marginEnd="8dp" app:layout_constraintEnd_toEndOf="parent" android:layout_marginRight="8dp"
             android:layout_marginStart="8dp" app:layout_constraintStart_toStartOf="parent"
-            android:layout_marginLeft="8dp" app:layout_constraintHorizontal_bias="0.502"/>
+            android:layout_marginLeft="8dp" app:layout_constraintHorizontal_bias="0.594"/>
     <Button
             android:text="unsub"
-            android:layout_width="129dp"
-            android:layout_height="38dp"
+            android:layout_width="125dp"
+            android:layout_height="39dp"
             android:id="@+id/unsub"
             android:layout_marginTop="32dp"
             app:layout_constraintTop_toBottomOf="@+id/Status" app:layout_constraintEnd_toEndOf="parent"
             android:layout_marginEnd="8dp" android:layout_marginRight="8dp"
             app:layout_constraintStart_toStartOf="parent" android:layout_marginLeft="8dp"
             android:layout_marginStart="8dp" android:layout_marginBottom="8dp"
-            app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintHorizontal_bias="0.502"
+            app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintHorizontal_bias="0.589"
             app:layout_constraintVertical_bias="0.0"/>
     <Button
             android:text="status"
@@ -61,8 +61,21 @@
             app:layout_constraintTop_toBottomOf="@+id/btn2" app:layout_constraintStart_toStartOf="parent"
             android:layout_marginLeft="8dp" android:layout_marginStart="8dp" app:layout_constraintEnd_toEndOf="parent"
             android:layout_marginEnd="8dp" android:layout_marginRight="8dp" android:layout_marginBottom="8dp"
-            app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintHorizontal_bias="0.502"
-            app:layout_constraintVertical_bias="0.033"/>
+            app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintHorizontal_bias="0.594"
+            app:layout_constraintVertical_bias="0.012"/>
+    <EditText
+            android:layout_width="98dp"
+            android:layout_height="43dp"
+            android:inputType="number"
+            android:ems="10"
+            android:id="@+id/editText" android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            app:layout_constraintBottom_toBottomOf="parent" android:layout_marginEnd="8dp"
+            android:layout_marginRight="8dp"
+            app:layout_constraintVertical_bias="0.043" android:layout_marginStart="8dp"
+            app:layout_constraintStart_toStartOf="parent" android:layout_marginLeft="8dp"
+            app:layout_constraintHorizontal_bias="0.861" app:layout_constraintEnd_toStartOf="@+id/btn2"
+            app:layout_constraintTop_toBottomOf="@+id/btn1"/>
 
 
 </android.support.constraint.ConstraintLayout>

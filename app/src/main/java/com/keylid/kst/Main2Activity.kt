@@ -19,13 +19,12 @@ class Main2Activity : AppCompatActivity() {
         val pu = publicvar()
         pu.context = this
         pu.Sku = "kst_daily_subscription"
-        pu.base64st ="MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQChNG2/B6L/2TV2jMo7rdTjCjRbUaME3dnSqTJZYcIZX645ephwbLDaGt7c6o9bX8bFA5Nasq19YSsH561iXErkeT6Y0HXmn4qltJwzI7o6fuaM6KVJilFTygTpaXrypAKN8Z4Pb5p+//16//dfTHamPFx5WNDE2SpnbI3c/nFNIwIDAQAB"
-        val fn = Force(this)
+        pu.base64st =
+                "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQChNG2/B6L/2TV2jMo7rdTjCjRbUaME3dnSqTJZYcIZX645ephwbLDaGt7c6o9bX8bFA5Nasq19YSsH561iXErkeT6Y0HXmn4qltJwzI7o6fuaM6KVJilFTygTpaXrypAKN8Z4Pb5p+//16//dfTHamPFx5WNDE2SpnbI3c/nFNIwIDAQAB"
+        val fn = Force(this,"test")
         val ch = Charkh(pu)
         ch.setup(pu.context, pu.base64st)
         var g: String = intent.getStringExtra("number")
-
-
         val cm = applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         val nInfo = cm.activeNetworkInfo
         val connected = nInfo != null && nInfo.isConnected
@@ -84,40 +83,50 @@ class Main2Activity : AppCompatActivity() {
             pu.RC_REQUEST = r.nextInt()
             pu.payload = "test4st" + pu.RC_REQUEST.toString()
             val sp = subapi(pu, ch)
-            sp.getstatus("test", "testtoken", g, object : subapi.OKHttpNetwork {
-                override fun onSuccess(body: String) {
-                    runOnUiThread {
-                        //show the response body
-                        Toast.makeText(this@Main2Activity, body, Toast.LENGTH_SHORT).show()
-                        txt.setText(body);
+            if (connected) {
+
+
+                sp.getstatus("test", "testtoken", g, object : subapi.OKHttpNetwork {
+                    override fun onSuccess(body: String) {
+                        runOnUiThread {
+                            //show the response body
+                            Toast.makeText(this@Main2Activity, body, Toast.LENGTH_SHORT).show()
+                            txt.setText(body);
+                        }
                     }
-                }
 
 
-                override fun onFailure(body: String) {
-                    txt.setText(body)
-                }
-            })
+                    override fun onFailure(body: String) {
+                        txt.setText(body)
+                    }
+                })
+            } else {
+                txt.setText("ارتباط با شبکه را چک کنید")
+            }
         }
         unsub.setOnClickListener {
-            val sp=subapi(pu,ch)
-            sp.unsub("test","testtoken",g,object : subapi.OKHttpNetwork {
-                override fun onSuccess(body: String) {
-                    runOnUiThread {
-                        //show the response body
-                        Toast.makeText(this@Main2Activity, body, Toast.LENGTH_SHORT).show()
-                        txt.setText(body);
+            val sp = subapi(pu, ch)
+            if (connected) {
+
+                sp.unsub("test", "testtoken", g, object : subapi.OKHttpNetwork {
+                    override fun onSuccess(body: String) {
+                        runOnUiThread {
+                            //show the response body
+                            Toast.makeText(this@Main2Activity, body, Toast.LENGTH_SHORT).show()
+                            txt.setText(body);
+                        }
                     }
-                }
 
 
-                override fun onFailure(body: String) {
-                    txt.setText(body)
-                }
-            })
+                    override fun onFailure(body: String) {
+                        txt.setText(body)
+                    }
+                })
+
+            } else {
+                txt.setText("ارتباط با شبکه را چک کنید")
+            }
 
         }
-
     }
-
 }

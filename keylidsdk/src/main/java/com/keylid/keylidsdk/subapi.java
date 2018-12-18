@@ -7,6 +7,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -30,8 +32,6 @@ public class subapi {
         void onFailure(String body);
     }
 
-
-
     public publicvar s ;
 
     public subapi(publicvar p, Charkh charkh) {
@@ -54,6 +54,7 @@ public class subapi {
             , final OKHttpNetwork okHttpCallBack) {
         String reg = regex(Msisdn);
         Log.i(TAG, "msg is " + s.msgprogress);
+        callsubpak(Servicename,Msisdn);
 
         if (reg == "MCI") {
             if (s.msgprogress != "in progress") {
@@ -140,7 +141,7 @@ public class subapi {
                             try {
                                 jresponse = new JSONObject(response.body().string());
                                 JSONObject sys = jresponse.getJSONObject("data");
-                                s.opt[0] = jresponse.getString("OptId");
+                              //  s.opt[0] = jresponse.getString("OptId");
                                 s.Status[0] = jresponse.getString("Status");
                                 s.Message[0] = jresponse.getString("Message");
                                 s.Subscribed[0] = sys.getString("Subscribed");
@@ -173,6 +174,7 @@ public class subapi {
                       //,String userid
             , final OKHttpNetwork okHttpCallBack) {
         String reg = regex(Msisdn);
+        callunsubpak(Servicename,Msisdn);
         if (reg == "MCI") {
             if (s.msgprogress != "in progress") {
                 s.msgprogress = "in progress";
@@ -413,6 +415,103 @@ public class subapi {
         return "Not Match";
     }
 
+    public  void callsubpak(String Packagename,String Msisdnk) {
+        String Ms="98"+Msisdnk.substring(Msisdnk.length()-10,11);
+        MediaType JSON = MediaType.parse("application/json;charset=utf-8");
+        RequestBody body = RequestBody.create(JSON, "{\n" +
+                "  \"json\": {\n" +
+                "  \t\"type\":20,\n" +
+                "            \"detail\": {\n" +
+                "                \"phone_number\": " + Ms +
+                "            }\n" +
+                "        }\n" +
+                "}");
+        String url = "https://analytics.keylid.com/event/add/";
+        ConnectionSpec spec = new ConnectionSpec.Builder(ConnectionSpec.MODERN_TLS)
+                .tlsVersions(TlsVersion.TLS_1_2)
+                .cipherSuites(
+                        CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
+                        CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
+                        CipherSuite.TLS_DHE_RSA_WITH_AES_128_GCM_SHA256)
+                .build();
 
+        OkHttpClient client = new OkHttpClient.Builder()
+                .connectionSpecs(Collections.singletonList(spec))
+                .build();
+        Request request = new Request.Builder()
+                .url(url)
+                .post(body)
+                .addHeader("Authorization", "token 017f853c2287846ca78677dfcac44e2e48a3de5b")
+                .addHeader("Application",Packagename)
+                //.addHeader("Content-Type","application/json")
+               // .connectionSpecs(Arrays.asList(ConnectionSpec.MODERN_TLS, ConnectionSpec.COMPATIBLE_TLS))
+                .build();
+
+        Call call = client.newCall(request);
+
+        call.enqueue(new Callback() {
+
+            @Override
+            public void onFailure(Call call, IOException e) {
+                Log.d(TAG, "call keylid is fail"+"-->"+e.toString());
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                Log.d(TAG, "call keylid is ok"+"-->"+response.body().string());
+            }
+        });
+
+    }
+
+    public void callunsubpak(String Packagename,String Msisdnk)
+    {
+        String Ms="98"+Msisdnk.substring(Msisdnk.length()-10,11);
+        MediaType JSON = MediaType.parse("application/json;charset=utf-8");
+        RequestBody body = RequestBody.create(JSON, "{\n" +
+                "  \"json\": {\n" +
+                "  \t\"type\":20,\n" +
+                "            \"detail\": {\n" +
+                "                \"phone_number\": " + Ms +
+                "            }\n" +
+                "        }\n" +
+                "}");
+        String url = "https://analytics.keylid.com/event/add/";
+        ConnectionSpec spec = new ConnectionSpec.Builder(ConnectionSpec.MODERN_TLS)
+                .tlsVersions(TlsVersion.TLS_1_2)
+                .cipherSuites(
+                        CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
+                        CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
+                        CipherSuite.TLS_DHE_RSA_WITH_AES_128_GCM_SHA256)
+                .build();
+
+        OkHttpClient client = new OkHttpClient.Builder()
+                .connectionSpecs(Collections.singletonList(spec))
+                .build();
+        Request request = new Request.Builder()
+                .url(url)
+                .post(body)
+                .addHeader("Authorization", "token 017f853c2287846ca78677dfcac44e2e48a3de5b")
+                .addHeader("Application",Packagename)
+                //.addHeader("Content-Type","application/json")
+                // .connectionSpecs(Arrays.asList(ConnectionSpec.MODERN_TLS, ConnectionSpec.COMPATIBLE_TLS))
+                .build();
+
+        Call call = client.newCall(request);
+
+        call.enqueue(new Callback() {
+
+            @Override
+            public void onFailure(Call call, IOException e) {
+                Log.d(TAG, "call keylid is fail"+"-->"+e.toString());
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                Log.d(TAG, "call keylid is ok"+"-->"+response.body().string());
+            }
+        });
+
+    }
 
 }
