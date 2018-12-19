@@ -19,9 +19,11 @@ allprojects {
     repositories {
         google()
         jcenter()
-        flatDir{
-            dirs('inAppPurchase')
-            dirs('inAppSDK')
+        flatDir {
+            dirs 'inAppPurchase'
+            dirs project(':keylidsdk').file('inAppPurchase')
+            dirs 'inAppSDK'
+            dirs project(':keylidsdk').file('inAppSDK')
         }
 
     }
